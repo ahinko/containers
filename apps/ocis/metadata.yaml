@@ -1,0 +1,4 @@
+---
+# renovate: datasource=docker depName=owncloud/ocis
+version: 7.1.1
+name: ocis
