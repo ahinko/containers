@@ -1,0 +1,4 @@
+---
+# renovate: datasource=docker depName=oetiker/znapzend
+version: v0.23.2
+name: znapzend
