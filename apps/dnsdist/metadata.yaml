@@ -1,0 +1,4 @@
+---
+# renovate: datasource=docker depName=powerdns/dnsdist
+version: 1.9.8
+name: dnsdist
