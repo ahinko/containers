@@ -5,6 +5,7 @@
     "docker:enableMajor",
     "helpers:pinGitHubActionDigests",
       "github>ahinko/containers//.renovate/autoMerge.json5",
+      "github>ahinko/containers//.renovate/customManagers.json5",
       "github>ahinko/containers//.renovate/labels.json5",
       "github>ahinko/containers//.renovate/semanticCommits.json5",
       ":automergeBranch",
