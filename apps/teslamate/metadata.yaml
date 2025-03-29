@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=teslamate/teslamate
-version: v1.32.0
+version: 1.33.0
 name: teslamate
