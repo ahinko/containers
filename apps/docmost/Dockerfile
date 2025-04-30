@@ -1,2 +1,2 @@
 # renovate: datasource=docker depName=docmost/docmost
-FROM docmost/docmost:0.20.3
+FROM docmost/docmost:0.20.4
