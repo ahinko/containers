@@ -1,2 +1,2 @@
 # renovate: datasource=docker depName=tombursch/kitchenowl
-FROM tombursch/kitchenowl:v0.6.11
+FROM tombursch/kitchenowl:v0.6.12
