@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=tombursch/kitchenowl
-version: v0.6.12
+version: v0.6.13
 name: kitchenowl
