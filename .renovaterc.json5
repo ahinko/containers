@@ -4,6 +4,7 @@
     "config:recommended",
     "docker:enableMajor",
     "helpers:pinGitHubActionDigests",
+      "github>ahinko/containers//.renovate/allowedVersions.json5",
       "github>ahinko/containers//.renovate/autoMerge.json5",
       "github>ahinko/containers//.renovate/customManagers.json5",
       "github>ahinko/containers//.renovate/labels.json5",
