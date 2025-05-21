@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
-version: 16.8-1
+version: 16.9-1
 name: postgres16
