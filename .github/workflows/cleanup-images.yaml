@@ -37,7 +37,10 @@ jobs:
 
       - name: Cleanup old images
         run: |
-          for app in ${{ steps.apps.outputs.apps }}; do
+          # Read apps into an array, handling newlines properly
+          mapfile -t app_array <<< "${{ steps.apps.outputs.apps }}"
+
+          for app in "${app_array[@]}"; do
             echo "Processing $app..."
 
             # Get all versions of the package
