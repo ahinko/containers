@@ -29,9 +29,14 @@ jobs:
         id: set-matrix
         run: |
           if [ -n "${{ steps.changes.outputs.all_changed_files }}" ]; then
-            CHANGED_APPS=$(echo "${{ steps.changes.outputs.all_changed_files }}" | grep -o "apps/[^/]*" | sort -u | cut -d/ -f2)
-            APPS_JSON=$(echo "$CHANGED_APPS" | jq -R -s 'split("\n") | map(select(length > 0))')
-            echo "matrix={\"app\":$APPS_JSON}" >> $GITHUB_OUTPUT
+            # Convert space-separated paths to newline-separated and extract app names
+            CHANGED_APPS=$(echo "${{ steps.changes.outputs.all_changed_files }}" | tr ' ' '\n' | grep -o "apps/[^/]*" | sort -u | cut -d/ -f2)
+            if [ -n "$CHANGED_APPS" ]; then
+              APPS_JSON=$(echo "$CHANGED_APPS" | jq -R -s 'split("\n") | map(select(length > 0))')
+              echo "matrix={\"app\":$APPS_JSON}" >> $GITHUB_OUTPUT
+            else
+              echo "matrix={\"app\":[]}" >> $GITHUB_OUTPUT
+            fi
           else
             echo "matrix={\"app\":[]}" >> $GITHUB_OUTPUT
           fi
