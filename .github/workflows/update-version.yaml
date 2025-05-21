@@ -99,16 +99,10 @@ jobs:
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump ${{ matrix.app }} version to ${{ steps.version.outputs.new_version }}"
-          title: "chore: bump ${{ matrix.app }} version to ${{ steps.version.outputs.new_version }}"
+          commit-message: "chore(${{ matrix.app }}): bump version to ${{ steps.version.outputs.new_version }}"
+          title: "chore(${{ matrix.app }}): bump version to ${{ steps.version.outputs.new_version }}"
           body: |
-            Automated version bump for ${{ matrix.app }}
-
-            - Current version: $(grep -E "^version:" apps/${{ matrix.app }}/metadata.yaml | sed -E 's/^version:\s*(.*)\s*$/\1/')
-            - New version: ${{ steps.version.outputs.new_version }}
+            Automated version bump for ${{ matrix.app }} to version ${{ steps.version.outputs.new_version }}
           branch: update-${{ matrix.app }}-to-${{ steps.version.outputs.new_version }}
           base: main
-          labels: |
-            automated pr
-            version bump
           delete-branch: true
