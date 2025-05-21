@@ -111,9 +111,10 @@ jobs:
             }
 
             const version = '${{ inputs.version }}';
+            const sanitizedVersion = sanitizeInputVersion(version);
             const validSemverRegex = /^v?(\d+(\.\d+)?(\.\d+)?)/;
             const date = new Date();
-            const parsedVersion = validSemverRegex.exec(version);
+            const parsedVersion = validSemverRegex.exec(sanitizedVersion);
             const validSemver = parsedVersion !== null;
 
             const parsedSemver = validSemver ? semver.coerce(parsedVersion[0]) : null;
@@ -121,11 +122,9 @@ jobs:
                 ? `${parsedSemver.major}.${parsedSemver.minor}.${parsedSemver.patch}`
                 : `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
 
-            const sanitizedInputVersion = validSemver ? sanitizeInputVersion(version) : version;
-
             core.setOutput('version', outputVersion);
             core.setOutput('validSemver', validSemver);
-            core.setOutput('sanitizedInputVersion', sanitizedInputVersion);
+            core.setOutput('sanitizedInputVersion', sanitizedVersion);
 
       - name: Build Meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
