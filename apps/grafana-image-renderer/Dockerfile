@@ -1,2 +1,2 @@
 # renovate: datasource=docker depName=grafana/grafana-image-renderer
-FROM grafana/grafana-image-renderer:3.12.5
+FROM grafana/grafana-image-renderer:3.12.6
