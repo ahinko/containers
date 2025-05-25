@@ -18,8 +18,9 @@
       fileMatch: [
         "apps/radicale/Dockerfile",
       ],
-      matchStrings: ["VERSION=(?<currentValue>.*)"],
-      datasourceTemplate: "docker",
+      matchStrings: ["VERSION=v(?<currentValue>.*)"],
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "Kozea/Radicale",
     },
   ],
 }
