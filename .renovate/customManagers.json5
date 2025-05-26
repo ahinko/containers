@@ -22,5 +22,15 @@
       datasourceTemplate: "github-releases",
       depNameTemplate: "Kozea/Radicale",
     },
+    {
+      customType: "regex",
+      description: "PostgreSQL",
+      fileMatch: [
+        "apps/postgres17/Dockerfile",
+      ],
+      matchStrings: ["ARG CNPG_TAG=\"(?<currentValue>.*)\""],
+      datasourceTemplate: "docker",
+      depNameTemplate: "ghcr.io/cloudnative-pg/postgresql",
+    },
   ],
 }
