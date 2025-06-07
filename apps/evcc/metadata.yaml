@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=evcc/evcc
-version: 0.204.1
+version: 0.204.2
 name: evcc
