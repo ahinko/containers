@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=cloudflare/cloudflared
-version: 2025.6.0
+version: 2025.6.1
 name: cloudflared
