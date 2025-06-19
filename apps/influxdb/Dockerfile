@@ -1,2 +1,2 @@
 # renovate: datasource=docker depName=influxdb
-FROM influxdb:2.7.11-alpine
+FROM influxdb:2.7.11
