@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=1password/connect-sync
-version: 1.7.4
-name: onepassword-connect-sync
