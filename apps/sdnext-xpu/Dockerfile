@@ -1,5 +1,5 @@
 # renovate: datasource=docker depName=intel/intel-extension-for-pytorch
-FROM intel/intel-extension-for-pytorch:2.7.10-xpu
+FROM intel/intel-extension-for-pytorch:2.8.10-xpu
 
 # Set paths to use with sdnext
 ENV SD_DATADIR="/mnt/data"
