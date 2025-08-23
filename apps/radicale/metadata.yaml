@@ -1,4 +1,0 @@
----
-# renovate: datasource=github-releases depName=Kozea/Radicale
-version: v3.5.5
-name: radicale
