@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=intel/intel-deviceplugin-operator
-version: 0.32.1
+version: 0.34.0
 name: intel-deviceplugin-operator
