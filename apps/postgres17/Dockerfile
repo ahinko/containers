@@ -1,7 +1,7 @@
 # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
-ARG CNPG_TAG="17.6-1"
+ARG CNPG_TAG="17.6-202509151215-standard-trixie"
 
-FROM ghcr.io/cloudnative-pg/postgresql:$CNPG_TAG-bookworm
+FROM ghcr.io/cloudnative-pg/postgresql:$CNPG_TAG
 
 ARG CNPG_TAG
 ARG POSTGRES_VERSION=${CNPG_TAG%.*}

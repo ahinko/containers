@@ -1,12 +1,12 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  packageRules: [
-    {
-      allowedVersions: "<=17",
-      matchDatasources: ["docker"],
-      matchFileNames: ["apps/postgres17/**"],
-      matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
-      versioning: "regex:^(?<major>\\d{2}).(?<minor>\\d{1,2})-(?<patch>\\d{1,2})$",
-    },
-  ],
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    packageRules: [
+        {
+            allowedVersions: "<=17",
+            matchDatasources: ["docker"],
+            matchFileNames: ["apps/postgres17/**"],
+            matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
+            versioning: "regex:^(?<major>\\d{2}).(?<minor>\\d{1,2})-(?<patch>\\d{1,2})$",
+        },
+    ],
 }

@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "apps/buoy/Dockerfile"
-      - "apps/sdnext/Dockerfile"
+      - "apps/postgres17/Dockerfile"
       # Add more specific Dockerfile paths here as needed
 
 jobs:
