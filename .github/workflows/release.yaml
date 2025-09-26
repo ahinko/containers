@@ -5,9 +5,10 @@ name: Release
 on:
   pull_request:
     branches: ["main"]
+    paths: ["apps/**/metadata.yaml"]
   push:
     branches: ["main"]
-    paths: ["apps/**"]
+    paths: ["apps/**/metadata.yaml"]
   workflow_dispatch:
     inputs:
       app:
