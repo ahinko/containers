@@ -6,7 +6,7 @@ ARG CNPG_TAG
 ARG POSTGRES_VERSION=${CNPG_TAG%.*}
 
 # renovate: datasource=github-releases depName=tensorchord/VectorChord
-ARG VECTORCHORD_TAG="0.4.3"
+ARG VECTORCHORD_TAG="0.5.3"
 
 # To install any package we need to be root
 USER root
