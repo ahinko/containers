@@ -17,7 +17,7 @@
             customType: "regex",
             description: "PostgreSQL",
             fileMatch: ["apps/postgres17/Dockerfile"],
-            matchStrings: ['ARG CNPG_TAG="(?<currentValue>.*\\-.*)"'],
+            matchStrings: ['ARG CNPG_TAG="(?<currentValue>.*)"'],
             datasourceTemplate: "docker",
             depNameTemplate: "ghcr.io/cloudnative-pg/postgresql",
             // matches: 17.6-202509151215-standard-trixie
