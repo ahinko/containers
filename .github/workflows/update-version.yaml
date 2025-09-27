@@ -7,6 +7,7 @@ on:
     paths:
       - "apps/buoy/Dockerfile"
       - "apps/postgres17/Dockerfile"
+      - "apps/postgres18/Dockerfile"
       # Add more specific Dockerfile paths here as needed
 
 jobs:
