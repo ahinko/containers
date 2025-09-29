@@ -1,4 +1,4 @@
-ARG CNPG_TAG="17.6-202509261031-system-trixie"
+ARG CNPG_TAG="17.6-202509290807-system-trixie"
 
 FROM ghcr.io/cloudnative-pg/postgresql:$CNPG_TAG
 
