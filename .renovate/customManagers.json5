@@ -16,7 +16,10 @@
         {
             customType: "regex",
             description: "PostgreSQL",
-            fileMatch: ["apps/postgres17/Dockerfile"],
+            fileMatch: [
+                "apps/postgres17/Dockerfile",
+                "apps/postgres18/Dockerfile",
+            ],
             matchStrings: ['ARG CNPG_TAG="(?<currentValue>.*)"'],
             datasourceTemplate: "docker",
             depNameTemplate: "ghcr.io/cloudnative-pg/postgresql",
