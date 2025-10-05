@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=influxdb
-version: 2.7.12
-name: influxdb
