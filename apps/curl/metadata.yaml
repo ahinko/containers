@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=curlimages/curl
-version: 8.16.0
-name: curl
