@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=valkey/valkey
-version: 8.1.4
-name: valkey
