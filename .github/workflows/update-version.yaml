@@ -19,46 +19,98 @@ jobs:
       pull-requests: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        name: Checkout repository (full history)
         with:
           ref: ${{ github.head_ref }}
+          fetch-depth: 0 # ensure base/head SHAs are available
+
+      - name: Show PR info (debug)
+        run: |
+          echo "PR base ref: ${{ github.event.pull_request.base.ref }}"
+          echo "PR base sha: ${{ github.event.pull_request.base.sha }}"
+          echo "PR head ref: ${{ github.event.pull_request.head.ref }}"
+          echo "PR head sha: ${{ github.event.pull_request.head.sha }}"
 
       - name: Find changed Dockerfiles
         id: changed
         run: |
-          changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep 'Dockerfile' || true)
+          # Compare PR head vs PR base using exact SHAs from the event (avoid relying on origin/main)
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+
+          # List changed files between base and head
+          changed_files=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'Dockerfile' || true)
+
+          echo "Changed dockerfiles: $changed_files"
           echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
 
       - name: Bump metadata.yaml versions
         if: steps.changed.outputs.changed_files != ''
         run: |
+          set -euo pipefail
+          touched_meta_files=""
+
           for file in ${{ steps.changed.outputs.changed_files }}; do
             dir=$(dirname "$file")
             meta="$dir/metadata.yaml"
             if [ -f "$meta" ]; then
               echo "Updating $meta"
-              current=$(grep '^version:' "$meta" | awk '{print $2}')
+              # Extract current version (assumes format: version: X.Y.Z)
+              current=$(awk '/^version:/{print $2; exit}' "$meta")
+              if [ -z "$current" ]; then
+                echo "No version found in $meta, skipping."
+                continue
+              fi
+
+              # compute new patch version
               base=${current%.*}
               patch=${current##*.}
+              # ensure patch is numeric
+              if ! printf '%s' "$patch" | grep -Eq '^[0-9]+$'; then
+                echo "Patch part is not numeric in $meta (found: $patch). Skipping."
+                continue
+              fi
+
               new_patch=$((patch + 1))
               new_version="${base}.${new_patch}"
               sed -i "s/^version: .*/version: ${new_version}/" "$meta"
               echo "Updated version to ${new_version}"
+              touched_meta_files="$touched_meta_files $meta"
+            else
+              echo "$meta not found, skipping."
             fi
           done
 
+          # Export touched files for commit step
+          echo "touched_meta_files=$touched_meta_files" >> $GITHUB_OUTPUT
+
       - name: Commit and push changes
         if: steps.changed.outputs.changed_files != ''
+        env:
+          GIT_AUTHOR_NAME: "github-actions[bot]"
+          GIT_AUTHOR_EMAIL: "github-actions[bot]@users.noreply.github.com"
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
 
-          if git diff --quiet; then
-            echo "No version changes to commit."
+          touched=${{ steps.changed.outputs.touched_meta_files }}
+          if [ -z "$touched" ]; then
+            echo "No metadata files were updated; nothing to commit."
             exit 0
           fi
 
-          git add apps/*/metadata.yaml
+          git config user.name "$GIT_AUTHOR_NAME"
+          git config user.email "$GIT_AUTHOR_EMAIL"
+
+          # Stage only the specific metadata files we touched
+          for f in $touched; do
+            git add "$f" || true
+          done
+
+          if git diff --staged --quiet; then
+            echo "No staged changes to commit."
+            exit 0
+          fi
+
           git commit -m "chore: bump metadata version (auto)"
           git push origin HEAD:${{ github.head_ref }}
