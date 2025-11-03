@@ -1,10 +1,9 @@
 name: Update Version
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
+  push:
     branches:
-      - main
+      - "renovate/**"
     paths:
       - "apps/buoy/Dockerfile"
       - "apps/postgres18/Dockerfile"
