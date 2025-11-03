@@ -16,7 +16,7 @@ jobs:
 
     permissions:
       contents: write
-      pull-requests: read
+      pull-requests: write
 
     steps:
       - name: Checkout repository (full history)
