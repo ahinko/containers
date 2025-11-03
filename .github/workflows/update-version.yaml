@@ -2,13 +2,13 @@ name: Update Version
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize]
     branches:
       - main
     paths:
       - "apps/buoy/Dockerfile"
       - "apps/postgres18/Dockerfile"
-      # Add more specific Dockerfile paths here as needed
+      # Add more Dockerfiles as needed
 
 jobs:
   update-version:
@@ -19,34 +19,36 @@ jobs:
       pull-requests: read
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        name: Checkout repository (full history)
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0 # ensure base/head SHAs are available
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
 
-      - name: Show PR info (debug)
+      - name: Check if version bump already exists
+        id: check_bump
         run: |
-          echo "PR base ref: ${{ github.event.pull_request.base.ref }}"
-          echo "PR base sha: ${{ github.event.pull_request.base.sha }}"
-          echo "PR head ref: ${{ github.event.pull_request.head.ref }}"
-          echo "PR head sha: ${{ github.event.pull_request.head.sha }}"
+          if git log --oneline | grep -q "chore: bump metadata version (auto)"; then
+            echo "Version bump already exists. Skipping."
+            echo "already_bumped=true" >> $GITHUB_OUTPUT
+          else
+            echo "already_bumped=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Find changed Dockerfiles
+        if: steps.check_bump.outputs.already_bumped == 'false'
         id: changed
         run: |
-          # Compare PR head vs PR base using exact SHAs from the event (avoid relying on origin/main)
           BASE_SHA=${{ github.event.pull_request.base.sha }}
           HEAD_SHA=${{ github.event.pull_request.head.sha }}
-
-          # List changed files between base and head
           changed_files=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'Dockerfile' || true)
-
           echo "Changed dockerfiles: $changed_files"
           echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
 
       - name: Bump metadata.yaml versions
-        if: steps.changed.outputs.changed_files != ''
+        if: steps.changed.outputs.changed_files != '' && steps.check_bump.outputs.already_bumped == 'false'
+        id: bump
         run: |
           set -euo pipefail
           touched_meta_files=""
@@ -56,19 +58,16 @@ jobs:
             meta="$dir/metadata.yaml"
             if [ -f "$meta" ]; then
               echo "Updating $meta"
-              # Extract current version (assumes format: version: X.Y.Z)
               current=$(awk '/^version:/{print $2; exit}' "$meta")
               if [ -z "$current" ]; then
                 echo "No version found in $meta, skipping."
                 continue
               fi
 
-              # compute new patch version
               base=${current%.*}
               patch=${current##*.}
-              # ensure patch is numeric
               if ! printf '%s' "$patch" | grep -Eq '^[0-9]+$'; then
-                echo "Patch part is not numeric in $meta (found: $patch). Skipping."
+                echo "Non-numeric patch in $meta ($patch), skipping."
                 continue
               fi
 
@@ -77,32 +76,28 @@ jobs:
               sed -i "s/^version: .*/version: ${new_version}/" "$meta"
               echo "Updated version to ${new_version}"
               touched_meta_files="$touched_meta_files $meta"
-            else
-              echo "$meta not found, skipping."
             fi
           done
 
-          # Export touched files for commit step
           echo "touched_meta_files=$touched_meta_files" >> $GITHUB_OUTPUT
 
       - name: Commit and push changes
-        if: steps.changed.outputs.changed_files != ''
+        if: steps.bump.outputs.touched_meta_files != '' && steps.check_bump.outputs.already_bumped == 'false'
         env:
           GIT_AUTHOR_NAME: "github-actions[bot]"
           GIT_AUTHOR_EMAIL: "github-actions[bot]@users.noreply.github.com"
         run: |
           set -euo pipefail
 
-          touched=${{ steps.changed.outputs.touched_meta_files }}
+          touched=${{ steps.bump.outputs.touched_meta_files }}
           if [ -z "$touched" ]; then
-            echo "No metadata files were updated; nothing to commit."
+            echo "No metadata files were updated."
             exit 0
           fi
 
           git config user.name "$GIT_AUTHOR_NAME"
           git config user.email "$GIT_AUTHOR_EMAIL"
 
-          # Stage only the specific metadata files we touched
           for f in $touched; do
             git add "$f" || true
           done
