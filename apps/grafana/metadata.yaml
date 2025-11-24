@@ -1,4 +1,4 @@
 ---
 # renovate: datasource=docker depName=grafana/grafana
-version: 12.2.1
+version: 12.3.0
 name: grafana
