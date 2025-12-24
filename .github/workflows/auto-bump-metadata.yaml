@@ -1,0 +1,158 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Auto Bump Metadata Version
+
+# This workflow automatically bumps the version in metadata.yaml
+# for apps that have disconnected versioning (Dockerfile versions don't match metadata.yaml)
+# Currently: postgres18, buoy
+# To add more apps, add them to the AUTO_BUMP_APPS array in the script below
+#
+# Bump type is determined by PR labels:
+#   - type/major → major bump (1.0.0 → 2.0.0)
+#   - type/minor → minor bump (1.0.0 → 1.1.0)
+#   - type/patch (default) → patch bump (1.0.0 → 1.0.1)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      # Add new apps here AND in the AUTO_BUMP_APPS array below
+      - "apps/postgres18/Dockerfile"
+      - "apps/buoy/Dockerfile"
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+
+      - name: Get changed files
+        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        id: changed-files
+        with:
+          files: apps/**/Dockerfile
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+
+      - name: Install required packages
+        run: npm install yaml
+
+      - name: Bump metadata version for affected apps
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        id: bump
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('yaml');
+            const path = require('path');
+
+            // Apps that need automatic version bumping in metadata.yaml
+            // Add new apps here as needed
+            const AUTO_BUMP_APPS = [
+              'postgres18',
+              'buoy',
+            ];
+
+            // Determine bump type from PR labels
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            let bumpType = 'patch'; // default
+            if (labels.includes('type/major')) {
+              bumpType = 'major';
+            } else if (labels.includes('type/minor')) {
+              bumpType = 'minor';
+            }
+            console.log('Bump type:', bumpType);
+
+            const changedFiles = process.env.CHANGED_FILES.split(' ').filter(Boolean);
+            console.log('Changed files:', changedFiles);
+
+            // Extract affected app names from changed Dockerfile paths
+            const affectedApps = new Set();
+            for (const file of changedFiles) {
+              const match = file.match(/^apps\/([^/]+)\/Dockerfile$/);
+              if (match && AUTO_BUMP_APPS.includes(match[1])) {
+                affectedApps.add(match[1]);
+              }
+            }
+
+            console.log('Apps to bump:', [...affectedApps]);
+
+            if (affectedApps.size === 0) {
+              console.log('No apps require metadata version bump');
+              core.setOutput('bumped', 'false');
+              return;
+            }
+
+            let bumped = false;
+            for (const app of affectedApps) {
+              const metadataPath = path.join('apps', app, 'metadata.yaml');
+
+              if (!fs.existsSync(metadataPath)) {
+                core.warning(`metadata.yaml not found for ${app}`);
+                continue;
+              }
+
+              const content = fs.readFileSync(metadataPath, 'utf8');
+              const metadata = yaml.parse(content);
+
+              // Parse current version
+              const versionParts = metadata.version.split('.').map(v => parseInt(v, 10));
+              if (versionParts.length !== 3 || versionParts.some(isNaN)) {
+                core.warning(`Invalid semver for ${app}: ${metadata.version}`);
+                continue;
+              }
+
+              let [major, minor, patch] = versionParts;
+
+              // Apply bump based on type
+              switch (bumpType) {
+                case 'major':
+                  major += 1;
+                  minor = 0;
+                  patch = 0;
+                  break;
+                case 'minor':
+                  minor += 1;
+                  patch = 0;
+                  break;
+                case 'patch':
+                default:
+                  patch += 1;
+                  break;
+              }
+
+              const newVersion = `${major}.${minor}.${patch}`;
+              console.log(`${app}: ${metadata.version} -> ${newVersion}`);
+
+              // Write back with proper YAML formatting
+              const newContent = `---\nversion: ${newVersion}\nname: ${metadata.name}\n`;
+              fs.writeFileSync(metadataPath, newContent);
+
+              core.notice(`Bumped ${app} version to ${newVersion} (${bumpType})`);
+              bumped = true;
+            }
+
+            core.setOutput('bumped', bumped ? 'true' : 'false');
+
+      - name: Commit changes
+        if: steps.bump.outputs.bumped == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/*/metadata.yaml
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: bump metadata version"
+            git push
+          fi
