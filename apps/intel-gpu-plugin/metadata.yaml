@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=intel/intel-gpu-plugin
-version: 0.34.1
-name: intel-gpu-plugin
