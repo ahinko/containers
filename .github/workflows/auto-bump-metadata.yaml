@@ -4,7 +4,7 @@ name: Auto Bump Metadata Version
 
 # This workflow automatically bumps the version in metadata.yaml
 # for apps that have disconnected versioning (Dockerfile versions don't match metadata.yaml)
-# Currently: postgres18, buoy
+# Currently: buoy
 # To add more apps, add them to the AUTO_BUMP_APPS array in the script below
 #
 # Bump type is determined by PR labels:
@@ -17,7 +17,6 @@ on:
     types: [opened, synchronize]
     paths:
       # Add new apps here AND in the AUTO_BUMP_APPS array below
-      - "apps/postgres18/Dockerfile"
       - "apps/buoy/Dockerfile"
 
 jobs:
@@ -59,7 +58,6 @@ jobs:
             // Apps that need automatic version bumping in metadata.yaml
             // Add new apps here as needed
             const AUTO_BUMP_APPS = [
-              'postgres18',
               'buoy',
             ];
 
