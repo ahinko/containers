@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=restic/restic
-version: 0.18.1
-name: restic

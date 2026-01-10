@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=docmost/docmost
-version: 0.24.1
-name: docmost

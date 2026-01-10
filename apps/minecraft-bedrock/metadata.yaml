@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=itzg/minecraft-bedrock-server
-version: 2025.12.2
-name: minecraft-bedrock

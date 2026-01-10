@@ -1,4 +1,0 @@
----
-# renovate: datasource=docker depName=krateng/maloja
-version: 3.2.4
-name: maloja
