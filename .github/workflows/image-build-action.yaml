@@ -144,7 +144,7 @@ jobs:
         id: push
         with:
           inputs: ${{ join(fromJSON(steps.meta.outputs.json).tags, ',') }}
-          images: >-
+          tags: >-
             ghcr.io/${{ github.repository_owner }}/${{ inputs.app }}@${{ needs.build.outputs.amd64 }},
           push: true
 
